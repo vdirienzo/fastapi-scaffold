@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🥷 FastAPI Ninja Scaffold - Production-Ready desde el Día 1</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --void: #050508;
+            --shadow: #0a0a10;
+            --night: #12121a;
+            --dusk: #1a1a28;
+            --purple-deep: #1a0a2e;
+            --purple-mid: #2d1b4e;
+            --purple-glow: #6b3fa0;
+            --cyan: #00ffcc;
+            --cyan-dim: #00d4aa;
+            --cyan-glow: rgba(0, 255, 204, 0.3);
+            --green: #39ff14;
+            --red: #ff3366;
+            --orange: #ff9500;
+            --text: #e8e8f0;
+            --text-dim: #8888a0;
+            --gradient-ninja: linear-gradient(135deg, var(--purple-deep) 0%, var(--void) 50%, var(--night) 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--void);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Smoke/Mist Background Effect */
+        .smoke-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.4;
+        }
+
+        .smoke-layer::before,
+        .smoke-layer::after {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background:
+                radial-gradient(ellipse at 20% 80%, var(--purple-glow) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, var(--cyan-glow) 0%, transparent 40%),
+                radial-gradient(ellipse at 50% 50%, rgba(26, 10, 46, 0.5) 0%, transparent 60%);
+            animation: smokeFlow 30s ease-in-out infinite;
+        }
+
+        .smoke-layer::after {
+            animation: smokeFlow 25s ease-in-out infinite reverse;
+            opacity: 0.6;
+        }
+
+        @keyframes smokeFlow {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(-5%, 5%) rotate(2deg); }
+            50% { transform: translate(5%, -5%) rotate(-1deg); }
+            75% { transform: translate(-3%, -3%) rotate(1deg); }
+        }
+
+        /* Floating Particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--cyan);
+            border-radius: 50%;
+            opacity: 0;
+            animation: particleFloat 8s ease-in-out infinite;
+        }
+
+        @keyframes particleFloat {
+            0%, 100% { opacity: 0; transform: translateY(100vh) scale(0); }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.8; }
+            100% { opacity: 0; transform: translateY(-20vh) scale(1); }
+        }
+
+        /* Main Container */
+        main {
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .ninja-icon {
+            font-size: clamp(4rem, 15vw, 10rem);
+            margin-bottom: 1rem;
+            animation: ninjaReveal 1.5s ease-out forwards;
+            filter: drop-shadow(0 0 30px var(--cyan-glow));
+        }
+
+        @keyframes ninjaReveal {
+            0% { opacity: 0; transform: scale(0.5) rotate(-180deg); filter: blur(20px); }
+            60% { transform: scale(1.1) rotate(10deg); }
+            100% { opacity: 1; transform: scale(1) rotate(0deg); filter: blur(0) drop-shadow(0 0 30px var(--cyan-glow)); }
+        }
+
+        .hero h1 {
+            font-size: clamp(2rem, 8vw, 5rem);
+            font-weight: 900;
+            letter-spacing: -0.03em;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--text) 0%, var(--cyan) 50%, var(--purple-glow) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: titleFade 1s ease-out 0.3s both;
+        }
+
+        @keyframes titleFade {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hero .subtitle {
+            font-size: clamp(1rem, 3vw, 1.5rem);
+            font-weight: 300;
+            color: var(--text-dim);
+            margin-bottom: 2rem;
+            animation: titleFade 1s ease-out 0.5s both;
+        }
+
+        .hero .subtitle strong {
+            color: var(--cyan);
+            font-weight: 600;
+        }
+
+        .hero-cta {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            animation: titleFade 1s ease-out 0.7s both;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--cyan-dim) 0%, var(--cyan) 100%);
+            color: var(--void);
+            box-shadow: 0 4px 30px var(--cyan-glow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 40px var(--cyan-glow), 0 0 60px var(--cyan-glow);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text);
+            border: 2px solid var(--purple-glow);
+        }
+
+        .btn-secondary:hover {
+            background: var(--purple-deep);
+            border-color: var(--cyan);
+            color: var(--cyan);
+        }
+
+        /* Scroll Indicator */
+        .scroll-indicator {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        .scroll-indicator span {
+            display: block;
+            width: 30px;
+            height: 50px;
+            border: 2px solid var(--purple-glow);
+            border-radius: 15px;
+            position: relative;
+        }
+
+        .scroll-indicator span::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 6px;
+            height: 10px;
+            background: var(--cyan);
+            border-radius: 3px;
+            animation: scrollDot 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(10px); }
+        }
+
+        @keyframes scrollDot {
+            0%, 100% { opacity: 1; top: 8px; }
+            50% { opacity: 0.3; top: 25px; }
+        }
+
+        /* Section Styles */
+        section {
+            padding: 6rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-header h2 {
+            font-size: clamp(1.8rem, 5vw, 3rem);
+            font-weight: 800;
+            margin-bottom: 1rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-header h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--cyan), var(--purple-glow));
+            border-radius: 2px;
+        }
+
+        .section-header p {
+            color: var(--text-dim);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 1.5rem auto 0;
+        }
+
+        /* Stats Grid */
+        .stats-section {
+            background: var(--gradient-ninja);
+            border-radius: 24px;
+            padding: 4rem 2rem;
+            margin: 4rem auto;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stats-section::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M50 0L61 39L100 50L61 61L50 100L39 61L0 50L39 39Z' fill='%2300ffcc' fill-opacity='0.03'/%3E%3C/svg%3E");
+            background-size: 60px 60px;
+            opacity: 0.5;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 2rem 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            border: 1px solid rgba(107, 63, 160, 0.3);
+            transition: all 0.4s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--cyan);
+            box-shadow: 0 10px 40px rgba(0, 255, 204, 0.15);
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 900;
+            color: var(--cyan);
+            line-height: 1;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 30px var(--cyan-glow);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        /* Feature Cards */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .feature-card {
+            background: linear-gradient(145deg, var(--night) 0%, var(--shadow) 100%);
+            border-radius: 16px;
+            padding: 2rem;
+            border: 1px solid var(--dusk);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--cyan), var(--purple-glow));
+            transform: scaleX(0);
+            transition: transform 0.4s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--purple-glow);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+        }
+
+        .feature-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .feature-card h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text);
+        }
+
+        .feature-list {
+            list-style: none;
+        }
+
+        .feature-list li {
+            padding: 0.4rem 0;
+            color: var(--text-dim);
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .feature-list li::before {
+            content: '✓';
+            color: var(--cyan);
+            font-weight: bold;
+        }
+
+        /* Comparison Table */
+        .comparison-section {
+            overflow-x: auto;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 2rem;
+            background: var(--night);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 1.2rem 1.5rem;
+            text-align: left;
+            border-bottom: 1px solid var(--dusk);
+        }
+
+        .comparison-table thead {
+            background: linear-gradient(135deg, var(--purple-deep), var(--night));
+        }
+
+        .comparison-table th {
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--cyan);
+        }
+
+        .comparison-table th:last-child {
+            background: linear-gradient(135deg, rgba(0, 255, 204, 0.1), transparent);
+        }
+
+        .comparison-table tbody tr {
+            transition: background 0.3s ease;
+        }
+
+        .comparison-table tbody tr:hover {
+            background: rgba(107, 63, 160, 0.1);
+        }
+
+        .comparison-table td:first-child {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .comparison-table td:last-child {
+            color: var(--cyan);
+            font-weight: 600;
+        }
+
+        .badge-yes {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            color: var(--green);
+        }
+
+        .badge-no {
+            color: var(--red);
+            opacity: 0.7;
+        }
+
+        .badge-partial {
+            color: var(--orange);
+        }
+
+        /* Commands Section */
+        .commands-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .command-group {
+            background: var(--shadow);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--dusk);
+        }
+
+        .command-group-header {
+            background: linear-gradient(135deg, var(--purple-deep), var(--night));
+            padding: 1rem 1.5rem;
+            font-weight: 700;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .command-list {
+            padding: 1rem;
+        }
+
+        .command-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 1rem;
+            background: var(--night);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .command-item:hover {
+            background: var(--dusk);
+            transform: translateX(5px);
+        }
+
+        .command-item code {
+            color: var(--cyan);
+        }
+
+        .command-item span {
+            color: var(--text-dim);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.8rem;
+        }
+
+        /* Quick Start */
+        .quickstart-section {
+            background: linear-gradient(145deg, var(--night) 0%, var(--purple-deep) 50%, var(--night) 100%);
+            border-radius: 24px;
+            padding: 4rem 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--purple-mid);
+        }
+
+        .quickstart-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at center, var(--cyan-glow) 0%, transparent 40%);
+            opacity: 0.1;
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.1; }
+            50% { transform: scale(1.1); opacity: 0.2; }
+        }
+
+        .quickstart-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .quickstart-section h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .quickstart-section p {
+            color: var(--text-dim);
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
+        .code-block {
+            background: var(--void);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: left;
+            max-width: 600px;
+            margin: 2rem auto;
+            border: 1px solid var(--dusk);
+            position: relative;
+        }
+
+        .code-block pre {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            line-height: 1.8;
+            overflow-x: auto;
+        }
+
+        .code-block .comment {
+            color: var(--text-dim);
+        }
+
+        .code-block .command {
+            color: var(--cyan);
+        }
+
+        .code-block .output {
+            color: var(--green);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 4rem 2rem;
+            border-top: 1px solid var(--dusk);
+            margin-top: 4rem;
+        }
+
+        footer .ninja-small {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        footer p {
+            color: var(--text-dim);
+            margin-bottom: 0.5rem;
+        }
+
+        footer .author {
+            color: var(--cyan);
+            font-weight: 600;
+        }
+
+        /* Reveal Animations */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.8s ease-out;
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .reveal-delay-1 { transition-delay: 0.1s; }
+        .reveal-delay-2 { transition-delay: 0.2s; }
+        .reveal-delay-3 { transition-delay: 0.3s; }
+        .reveal-delay-4 { transition-delay: 0.4s; }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            section {
+                padding: 4rem 1rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .features-grid,
+            .commands-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .comparison-table {
+                font-size: 0.85rem;
+            }
+
+            .comparison-table th,
+            .comparison-table td {
+                padding: 0.8rem;
+            }
+
+            .hero-cta {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 280px;
+                justify-content: center;
+            }
+        }
+
+        /* Ninja Star Decorations */
+        .ninja-star {
+            position: absolute;
+            opacity: 0.1;
+            animation: starSpin 20s linear infinite;
+        }
+
+        @keyframes starSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .star-1 { top: 10%; left: 5%; font-size: 2rem; animation-duration: 25s; }
+        .star-2 { top: 30%; right: 8%; font-size: 1.5rem; animation-duration: 30s; animation-direction: reverse; }
+        .star-3 { bottom: 20%; left: 10%; font-size: 1.8rem; animation-duration: 22s; }
+        .star-4 { top: 60%; right: 5%; font-size: 2.2rem; animation-duration: 28s; animation-direction: reverse; }
+    </style>
+</head>
+<body>
+    <!-- Smoke Background Effect -->
+    <div class="smoke-layer"></div>
+
+    <!-- Floating Particles -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Ninja Star Decorations -->
+    <div class="ninja-star star-1">✦</div>
+    <div class="ninja-star star-2">✦</div>
+    <div class="ninja-star star-3">✦</div>
+    <div class="ninja-star star-4">✦</div>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="ninja-icon">🥷</div>
+            <h1>FastAPI Ninja Scaffold</h1>
+            <p class="subtitle">El scaffold de FastAPI <strong>más completo del planeta</strong> — Production-ready desde el día 1</p>
+            <div class="hero-cta">
+                <a href="#quickstart" class="btn btn-primary">
+                    ⚡ Empezar Ahora
+                </a>
+                <a href="#features" class="btn btn-secondary">
+                    📖 Ver Features
+                </a>
+            </div>
+            <div class="scroll-indicator">
+                <span></span>
+            </div>
+        </section>
+
+        <!-- Stats Section -->
+        <section class="stats-section reveal">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">62</div>
+                    <div class="stat-label">Archivos</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">3,500+</div>
+                    <div class="stat-label">Líneas de Código</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">15+</div>
+                    <div class="stat-label">Tests Incluidos</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">85%+</div>
+                    <div class="stat-label">Cobertura</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">10</div>
+                    <div class="stat-label">Endpoints</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">&lt;5min</div>
+                    <div class="stat-label">Setup Time</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section id="features">
+            <div class="section-header reveal">
+                <h2>🌟 Features Destacados</h2>
+                <p>Todo lo que necesitas para construir APIs de clase mundial, listo para usar</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card reveal reveal-delay-1">
+                    <span class="feature-icon">🔐</span>
+                    <h3>Authentication & Security</h3>
+                    <ul class="feature-list">
+                        <li>JWT con access + refresh tokens</li>
+                        <li>Password hashing con bcrypt</li>
+                        <li>Superuser vs regular permissions</li>
+                        <li>Security scanning (Bandit + Safety)</li>
+                        <li>Pre-commit hooks con checks</li>
+                    </ul>
+                </div>
+                <div class="feature-card reveal reveal-delay-2">
+                    <span class="feature-icon">🗄️</span>
+                    <h3>Database & ORM</h3>
+                    <ul class="feature-list">
+                        <li>SQLModel con async support</li>
+                        <li>PostgreSQL con connection pooling</li>
+                        <li>Alembic para migrations</li>
+                        <li>In-memory SQLite para tests</li>
+                        <li>Soft deletes pattern</li>
+                    </ul>
+                </div>
+                <div class="feature-card reveal reveal-delay-3">
+                    <span class="feature-icon">🧪</span>
+                    <h3>Testing</h3>
+                    <ul class="feature-list">
+                        <li>15+ tests escritos y funcionando</li>
+                        <li>Fixtures reusables</li>
+                        <li>Test database aislada</li>
+                        <li>Coverage reports (HTML + terminal)</li>
+                        <li>Async test support</li>
+                    </ul>
+                </div>
+                <div class="feature-card reveal reveal-delay-4">
+                    <span class="feature-icon">🐳</span>
+                    <h3>Docker & DevOps</h3>
+                    <ul class="feature-list">
+                        <li>Dockerfile multi-stage optimizado</li>
+                        <li>docker-compose con Postgres + Redis</li>
+                        <li>Health checks integrados</li>
+                        <li>Non-root user por seguridad</li>
+                        <li>pgAdmin incluido (opcional)</li>
+                    </ul>
+                </div>
+                <div class="feature-card reveal reveal-delay-1">
+                    <span class="feature-icon">✨</span>
+                    <h3>Code Quality</h3>
+                    <ul class="feature-list">
+                        <li>Ruff (linting + formatting)</li>
+                        <li>mypy (type checking)</li>
+                        <li>Pre-commit hooks automáticos</li>
+                        <li>Bandit (security scanning)</li>
+                        <li>Commitizen para commits</li>
+                    </ul>
+                </div>
+                <div class="feature-card reveal reveal-delay-2">
+                    <span class="feature-icon">🚀</span>
+                    <h3>Production-Ready</h3>
+                    <ul class="feature-list">
+                        <li>Environment-based config</li>
+                        <li>Structured logging con rotation</li>
+                        <li>Error handling robusto</li>
+                        <li>CORS configurado</li>
+                        <li>Rate limiting preparado</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Comparison Section -->
+        <section class="comparison-section">
+            <div class="section-header reveal">
+                <h2>🎯 Ninja Scaffold vs Otros</h2>
+                <p>Comparativa detallada con otros templates y scaffolds</p>
+            </div>
+            <table class="comparison-table reveal">
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>Scaffold Básico</th>
+                        <th>🥷 Ninja Scaffold</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>JWT Auth</td>
+                        <td class="badge-no">❌</td>
+                        <td class="badge-yes">✅ Completo</td>
+                    </tr>
+                    <tr>
+                        <td>Tests</td>
+                        <td class="badge-partial">⚠️ Mínimos</td>
+                        <td class="badge-yes">✅ 15+ tests</td>
+                    </tr>
+                    <tr>
+                        <td>Docker</td>
+                        <td class="badge-partial">⚠️ Básico</td>
+                        <td class="badge-yes">✅ Multi-stage</td>
+                    </tr>
+                    <tr>
+                        <td>CI/CD</td>
+                        <td class="badge-no">❌</td>
+                        <td class="badge-yes">✅ GitHub Actions</td>
+                    </tr>
+                    <tr>
+                        <td>Security</td>
+                        <td class="badge-partial">⚠️ Básico</td>
+                        <td class="badge-yes">✅ Bandit + Safety</td>
+                    </tr>
+                    <tr>
+                        <td>Documentación</td>
+                        <td class="badge-partial">⚠️ README</td>
+                        <td class="badge-yes">✅ 5 docs completos</td>
+                    </tr>
+                    <tr>
+                        <td>Makefile</td>
+                        <td class="badge-no">❌</td>
+                        <td class="badge-yes">✅ 30+ comandos</td>
+                    </tr>
+                    <tr>
+                        <td>Pre-commit</td>
+                        <td class="badge-no">❌</td>
+                        <td class="badge-yes">✅ 5 hooks</td>
+                    </tr>
+                    <tr>
+                        <td>Service Layer</td>
+                        <td class="badge-no">❌</td>
+                        <td class="badge-yes">✅ Completo</td>
+                    </tr>
+                    <tr>
+                        <td>Custom Exceptions</td>
+                        <td class="badge-no">❌</td>
+                        <td class="badge-yes">✅ 8 tipos</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Commands Section -->
+        <section id="commands">
+            <div class="section-header reveal">
+                <h2>📚 Comandos Útiles</h2>
+                <p>30+ comandos en el Makefile para acelerar tu desarrollo</p>
+            </div>
+            <div class="commands-grid">
+                <div class="command-group reveal reveal-delay-1">
+                    <div class="command-group-header">
+                        🛠️ Development
+                    </div>
+                    <div class="command-list">
+                        <div class="command-item">
+                            <code>make setup</code>
+                            <span>Setup completo</span>
+                        </div>
+                        <div class="command-item">
+                            <code>make run</code>
+                            <span>Dev server</span>
+                        </div>
+                        <div class="command-item">
+                            <code>make test</code>
+                            <span>Run tests</span>
+                        </div>
+                        <div class="command-item">
+                            <code>make test-cov</code>
+                            <span>Coverage report</span>
+                        </div>
+                        <div class="command-item">
+                            <code>make quality</code>
+                            <span>Todos los checks</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="command-group reveal reveal-delay-2">
+                    <div class="command-group-header">
+                        🐳 Docker
+                    </div>
+                    <div class="command-list">
+                        <div class="command-item">
+                            <code>make docker-build</code>
+                            <span>Build image</span>
+                        </div>
+                        <div class="command-item">
+                            <code>make docker-up</code>
+                            <span>Start services</span>
+                        </div>
+                        <div class="command-item">
+                            <code>make docker-down</code>
+                            <span>Stop services</span>
+                        </div>
+                        <div class="command-item">
+                            <code>make docker-logs</code>
+                            <span>View logs</span>
+                        </div>
+                        <div class="command-item">
+                            <code>make docker-clean</code>
+                            <span>Clean all</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="command-group reveal reveal-delay-3">
+                    <div class="command-group-header">
+                        🗄️ Database
+                    </div>
+                    <div class="command-list">
+                        <div class="command-item">
+                            <code>make migrate</code>
+                            <span>Run migrations</span>
+                        </div>
+                        <div class="command-item">
+                            <code>make migrate-create</code>
+                            <span>Create migration</span>
+                        </div>
+                        <div class="command-item">
+                            <code>make db-shell</code>
+                            <span>PostgreSQL shell</span>
+                        </div>
+                        <div class="command-item">
+                            <code>make shell</code>
+                            <span>IPython shell</span>
+                        </div>
+                        <div class="command-item">
+                            <code>make clean</code>
+                            <span>Clean files</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Start Section -->
+        <section id="quickstart" class="quickstart-section reveal">
+            <div class="quickstart-content">
+                <h2>⚡ Quick Start</h2>
+                <p>Tu API corriendo en menos de 5 minutos</p>
+
+                <div class="code-block">
+                    <pre><span class="comment"># Opción 1: Setup Automático</span>
+<span class="command">cd fastapi-scaffold</span>
+<span class="command">./setup.sh</span>
+<span class="command">make docker-up</span>
+<span class="command">make run</span>
+
+<span class="comment"># Opción 2: Docker Only (30 segundos)</span>
+<span class="command">cd fastapi-scaffold</span>
+<span class="command">cp .env.example .env</span>
+<span class="command">docker-compose up</span>
+
+<span class="output">✅ ¡Tu API está lista en: http://localhost:8000/docs</span></pre>
+                </div>
+
+                <div class="hero-cta" style="margin-top: 2rem;">
+                    <a href="#" class="btn btn-primary">
+                        📦 Descargar Scaffold
+                    </a>
+                    <a href="#" class="btn btn-secondary">
+                        📖 Ver Documentación
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tech Stack Banner -->
+        <section class="reveal">
+            <div class="section-header">
+                <h2>🎯 Stack Tecnológico</h2>
+                <p>State-of-the-art tools para desarrollo moderno</p>
+            </div>
+            <div class="features-grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));">
+                <div class="feature-card" style="text-align: center; padding: 1.5rem;">
+                    <span style="font-size: 2rem;">🐍</span>
+                    <h3 style="font-size: 1rem; margin-top: 0.5rem;">Python 3.12+</h3>
+                </div>
+                <div class="feature-card" style="text-align: center; padding: 1.5rem;">
+                    <span style="font-size: 2rem;">⚡</span>
+                    <h3 style="font-size: 1rem; margin-top: 0.5rem;">FastAPI</h3>
+                </div>
+                <div class="feature-card" style="text-align: center; padding: 1.5rem;">
+                    <span style="font-size: 2rem;">🗄️</span>
+                    <h3 style="font-size: 1rem; margin-top: 0.5rem;">SQLModel</h3>
+                </div>
+                <div class="feature-card" style="text-align: center; padding: 1.5rem;">
+                    <span style="font-size: 2rem;">🐘</span>
+                    <h3 style="font-size: 1rem; margin-top: 0.5rem;">PostgreSQL</h3>
+                </div>
+                <div class="feature-card" style="text-align: center; padding: 1.5rem;">
+                    <span style="font-size: 2rem;">🔴</span>
+                    <h3 style="font-size: 1rem; margin-top: 0.5rem;">Redis</h3>
+                </div>
+                <div class="feature-card" style="text-align: center; padding: 1.5rem;">
+                    <span style="font-size: 2rem;">🐳</span>
+                    <h3 style="font-size: 1rem; margin-top: 0.5rem;">Docker</h3>
+                </div>
+                <div class="feature-card" style="text-align: center; padding: 1.5rem;">
+                    <span style="font-size: 2rem;">🔑</span>
+                    <h3 style="font-size: 1rem; margin-top: 0.5rem;">JWT Auth</h3>
+                </div>
+                <div class="feature-card" style="text-align: center; padding: 1.5rem;">
+                    <span style="font-size: 2rem;">🚀</span>
+                    <h3 style="font-size: 1rem; margin-top: 0.5rem;">GitHub Actions</h3>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="ninja-small">🥷</div>
+        <p>¡Feliz coding, ninja!</p>
+        <p class="author">Autor: Homero Thompson del Lago del Terror</p>
+        <p style="margin-top: 1rem; font-size: 0.9rem;">Versión 1.0.0 • 2025</p>
+    </footer>
+
+    <script>
+        // Generate floating particles
+        const particlesContainer = document.getElementById('particles');
+        const particleCount = 30;
+
+        for (let i = 0; i < particleCount; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 8 + 's';
+            particle.style.animationDuration = (6 + Math.random() * 4) + 's';
+            particlesContainer.appendChild(particle);
+        }
+
+        // Reveal on scroll
+        const revealElements = document.querySelectorAll('.reveal');
+
+        const revealOnScroll = () => {
+            const windowHeight = window.innerHeight;
+            revealElements.forEach(el => {
+                const elementTop = el.getBoundingClientRect().top;
+                const revealPoint = 150;
+
+                if (elementTop < windowHeight - revealPoint) {
+                    el.classList.add('visible');
+                }
+            });
+        };
+
+        window.addEventListener('scroll', revealOnScroll);
+        window.addEventListener('load', revealOnScroll);
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        // Animate stats numbers on scroll
+        const animateValue = (obj, start, end, duration) => {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                const value = Math.floor(progress * (end - start) + start);
+                obj.textContent = value.toLocaleString() + (obj.dataset.suffix || '');
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        };
+
+        let statsAnimated = false;
+        const statsSection = document.querySelector('.stats-section');
+
+        const checkStatsVisible = () => {
+            if (statsAnimated) return;
+            const rect = statsSection.getBoundingClientRect();
+            if (rect.top < window.innerHeight && rect.bottom > 0) {
+                statsAnimated = true;
+                document.querySelectorAll('.stat-number').forEach(stat => {
+                    const text = stat.textContent;
+                    if (text.includes('+')) {
+                        const num = parseInt(text.replace(/[^0-9]/g, ''));
+                        stat.dataset.suffix = '+';
+                        animateValue(stat, 0, num, 2000);
+                    } else if (text.includes('%')) {
+                        const num = parseInt(text.replace(/[^0-9]/g, ''));
+                        stat.dataset.suffix = '%+';
+                        animateValue(stat, 0, num, 2000);
+                    } else if (text.includes('<')) {
+                        // Keep as is
+                    } else {
+                        const num = parseInt(text.replace(/[^0-9]/g, ''));
+                        if (!isNaN(num)) {
+                            animateValue(stat, 0, num, 2000);
+                        }
+                    }
+                });
+            }
+        };
+
+        window.addEventListener('scroll', checkStatsVisible);
+        window.addEventListener('load', checkStatsVisible);
+    </script>
+</body>
+</html>

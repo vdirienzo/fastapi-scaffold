@@ -1,0 +1,2226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FastAPI Scaffold — Quick Start Guide</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e14;
+            --bg-secondary: #0d1219;
+            --bg-tertiary: #131a24;
+            --bg-code: #0f141c;
+            --surface: #1a2332;
+            --surface-hover: #222d3d;
+            --border: #2d3a4d;
+            --border-glow: rgba(16, 185, 129, 0.3);
+            --text-primary: #e6edf3;
+            --text-secondary: #9ca3af;
+            --text-muted: #6b7280;
+            --accent-green: #10b981;
+            --accent-green-dim: rgba(16, 185, 129, 0.15);
+            --accent-cyan: #06b6d4;
+            --accent-cyan-dim: rgba(6, 182, 212, 0.15);
+            --accent-amber: #f59e0b;
+            --accent-red: #ef4444;
+            --accent-purple: #8b5cf6;
+            --glow-green: 0 0 20px rgba(16, 185, 129, 0.4);
+            --glow-cyan: 0 0 20px rgba(6, 182, 212, 0.3);
+            --sidebar-width: 280px;
+            --header-height: 60px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: calc(var(--header-height) + 20px);
+        }
+
+        body {
+            font-family: 'IBM Plex Sans', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            font-size: 16px;
+            overflow-x: hidden;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-green), var(--accent-cyan));
+            z-index: 1001;
+            transition: width 0.1s ease-out;
+            box-shadow: var(--glow-green);
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--header-height);
+            background: rgba(10, 14, 20, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            width: 100%;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-cyan));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            font-size: 18px;
+            color: var(--bg-primary);
+        }
+
+        .logo-text {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        .logo-text span {
+            color: var(--accent-green);
+        }
+
+        .header-badge {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: var(--accent-green-dim);
+            border: 1px solid var(--accent-green);
+            border-radius: 20px;
+            font-family: 'Fira Code', monospace;
+            font-size: 12px;
+            color: var(--accent-green);
+        }
+
+        .header-badge::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--accent-green);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: var(--header-height);
+            width: var(--sidebar-width);
+            height: calc(100vh - var(--header-height));
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+            padding: 24px 0;
+            z-index: 100;
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        .nav-section {
+            margin-bottom: 24px;
+        }
+
+        .nav-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            padding: 0 24px;
+            margin-bottom: 8px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 24px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-link:hover {
+            color: var(--text-primary);
+            background: var(--surface);
+            border-left-color: var(--accent-green);
+        }
+
+        .nav-link.active {
+            color: var(--accent-green);
+            background: var(--accent-green-dim);
+            border-left-color: var(--accent-green);
+        }
+
+        .nav-icon {
+            width: 18px;
+            height: 18px;
+            opacity: 0.7;
+        }
+
+        /* Main Content */
+        .main {
+            margin-left: var(--sidebar-width);
+            padding: calc(var(--header-height) + 40px) 60px 80px;
+            max-width: calc(100% - var(--sidebar-width));
+        }
+
+        .content {
+            max-width: 900px;
+        }
+
+        /* Hero Section */
+        .hero {
+            margin-bottom: 60px;
+            padding: 48px;
+            background: linear-gradient(135deg, var(--bg-tertiary), var(--surface));
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, var(--accent-green-dim), transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            background: var(--accent-cyan-dim);
+            border: 1px solid var(--accent-cyan);
+            border-radius: 20px;
+            font-family: 'Fira Code', monospace;
+            font-size: 12px;
+            color: var(--accent-cyan);
+            margin-bottom: 20px;
+        }
+
+        .hero h1 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 42px;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, var(--text-primary), var(--accent-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 18px;
+            color: var(--text-secondary);
+            max-width: 600px;
+        }
+
+        .hero-timer {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 24px;
+            padding: 12px 20px;
+            background: var(--bg-code);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-family: 'Fira Code', monospace;
+            font-size: 14px;
+        }
+
+        .hero-timer svg {
+            color: var(--accent-amber);
+        }
+
+        /* Section Styling */
+        section {
+            margin-bottom: 64px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        section:nth-child(1) { animation-delay: 0.1s; }
+        section:nth-child(2) { animation-delay: 0.15s; }
+        section:nth-child(3) { animation-delay: 0.2s; }
+        section:nth-child(4) { animation-delay: 0.25s; }
+
+        h2 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        h2 .icon {
+            width: 32px;
+            height: 32px;
+            background: var(--accent-green-dim);
+            border: 1px solid var(--accent-green);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-green);
+        }
+
+        h3 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 20px;
+            font-weight: 600;
+            margin: 32px 0 16px;
+            color: var(--text-primary);
+        }
+
+        h4 {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 24px 0 12px;
+            color: var(--accent-cyan);
+        }
+
+        p {
+            margin-bottom: 16px;
+            color: var(--text-secondary);
+        }
+
+        /* Code Blocks */
+        .code-block {
+            position: relative;
+            margin: 20px 0;
+            border-radius: 12px;
+            overflow: hidden;
+            background: var(--bg-code);
+            border: 1px solid var(--border);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+        }
+
+        .code-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .code-lang {
+            font-family: 'Fira Code', monospace;
+            font-size: 12px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .code-lang::before {
+            content: '';
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--accent-green);
+        }
+
+        .code-lang.json::before { background: var(--accent-amber); }
+        .code-lang.python::before { background: #3776ab; }
+        .code-lang.sql::before { background: var(--accent-purple); }
+
+        .copy-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-muted);
+            font-family: 'Fira Code', monospace;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .copy-btn:hover {
+            background: var(--accent-green-dim);
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        .copy-btn.copied {
+            background: var(--accent-green);
+            border-color: var(--accent-green);
+            color: var(--bg-primary);
+        }
+
+        pre {
+            padding: 20px;
+            overflow-x: auto;
+            font-family: 'Fira Code', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        pre::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        pre::-webkit-scrollbar-track {
+            background: var(--bg-code);
+        }
+
+        pre::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        code {
+            font-family: 'Fira Code', monospace;
+        }
+
+        /* Syntax Highlighting */
+        .token-comment { color: #6a737d; font-style: italic; }
+        .token-keyword { color: #ff7b72; }
+        .token-string { color: #a5d6ff; }
+        .token-number { color: #79c0ff; }
+        .token-function { color: #d2a8ff; }
+        .token-variable { color: #ffa657; }
+        .token-operator { color: #ff7b72; }
+        .token-property { color: #7ee787; }
+        .token-url { color: var(--accent-cyan); }
+
+        /* Inline Code */
+        :not(pre) > code {
+            padding: 3px 8px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: var(--accent-cyan);
+        }
+
+        /* Tabs */
+        .tabs-container {
+            margin: 24px 0;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            background: var(--bg-secondary);
+        }
+
+        .tabs-header {
+            display: flex;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 14px 24px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-bottom: 2px solid transparent;
+            white-space: nowrap;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-primary);
+            background: var(--bg-tertiary);
+        }
+
+        .tab-btn.active {
+            color: var(--accent-green);
+            border-bottom-color: var(--accent-green);
+            background: var(--bg-tertiary);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 0;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .tab-content .code-block {
+            margin: 0;
+            border: none;
+            border-radius: 0;
+        }
+
+        /* Badges / Pills */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-family: 'Fira Code', monospace;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge-green {
+            background: var(--accent-green-dim);
+            color: var(--accent-green);
+            border: 1px solid var(--accent-green);
+        }
+
+        .badge-cyan {
+            background: var(--accent-cyan-dim);
+            color: var(--accent-cyan);
+            border: 1px solid var(--accent-cyan);
+        }
+
+        .badge-amber {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--accent-amber);
+            border: 1px solid var(--accent-amber);
+        }
+
+        .badge-red {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--accent-red);
+            border: 1px solid var(--accent-red);
+        }
+
+        .badge-purple {
+            background: rgba(139, 92, 246, 0.15);
+            color: var(--accent-purple);
+            border: 1px solid var(--accent-purple);
+        }
+
+        /* Commands Grid */
+        .commands-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .command-pill {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .command-pill:hover {
+            border-color: var(--accent-green);
+            box-shadow: var(--glow-green);
+            transform: translateY(-2px);
+        }
+
+        .command-pill code {
+            font-size: 13px;
+            color: var(--accent-green);
+            background: none;
+            border: none;
+            padding: 0;
+        }
+
+        .command-pill span {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* Accordion */
+        .accordion {
+            margin: 20px 0;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .accordion-item {
+            border-bottom: 1px solid var(--border);
+        }
+
+        .accordion-item:last-child {
+            border-bottom: none;
+        }
+
+        .accordion-header {
+            width: 100%;
+            padding: 18px 20px;
+            background: var(--surface);
+            border: none;
+            color: var(--text-primary);
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 15px;
+            font-weight: 500;
+            text-align: left;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .accordion-header:hover {
+            background: var(--surface-hover);
+        }
+
+        .accordion-header .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .accordion-header .chevron {
+            width: 20px;
+            height: 20px;
+            color: var(--text-muted);
+            transition: transform 0.3s ease;
+        }
+
+        .accordion-item.open .accordion-header .chevron {
+            transform: rotate(180deg);
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .accordion-item.open .accordion-content {
+            max-height: 1000px;
+        }
+
+        .accordion-body {
+            padding: 20px;
+            background: var(--bg-tertiary);
+        }
+
+        /* Cards */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 24px 0;
+        }
+
+        .card {
+            padding: 24px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: var(--accent-green);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+        }
+
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--accent-green-dim);
+            border: 1px solid var(--accent-green);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            color: var(--accent-green);
+        }
+
+        .card h4 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 16px;
+            margin: 0 0 8px;
+            color: var(--text-primary);
+        }
+
+        .card p {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        /* Tables */
+        .table-container {
+            margin: 20px 0;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: var(--surface);
+        }
+
+        th {
+            padding: 14px 16px;
+            text-align: left;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr {
+            transition: background 0.2s ease;
+        }
+
+        tbody tr:hover {
+            background: var(--surface);
+        }
+
+        td code {
+            font-size: 13px;
+        }
+
+        /* ASCII Art */
+        .ascii-box {
+            margin: 24px 0;
+            padding: 24px;
+            background: var(--bg-code);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow-x: auto;
+        }
+
+        .ascii-art {
+            font-family: 'Fira Code', monospace;
+            font-size: 12px;
+            line-height: 1.4;
+            color: var(--accent-green);
+            white-space: pre;
+        }
+
+        /* Links */
+        a {
+            color: var(--accent-cyan);
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        a:hover {
+            color: var(--accent-green);
+            text-decoration: underline;
+        }
+
+        .external-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .external-link svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        /* Resources Grid */
+        .resources-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 16px;
+            margin: 24px 0;
+        }
+
+        .resource-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .resource-link:hover {
+            border-color: var(--accent-cyan);
+            background: var(--surface-hover);
+            text-decoration: none;
+            transform: translateX(4px);
+        }
+
+        .resource-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .resource-link span {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        /* Tips Box */
+        .tip-box {
+            margin: 24px 0;
+            padding: 20px 24px;
+            background: var(--accent-green-dim);
+            border: 1px solid var(--accent-green);
+            border-left: 4px solid var(--accent-green);
+            border-radius: 8px;
+        }
+
+        .tip-box.warning {
+            background: rgba(245, 158, 11, 0.1);
+            border-color: var(--accent-amber);
+            border-left-color: var(--accent-amber);
+        }
+
+        .tip-box.danger {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: var(--accent-red);
+            border-left-color: var(--accent-red);
+        }
+
+        .tip-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .tip-box p {
+            margin: 0;
+            color: var(--text-secondary);
+        }
+
+        /* Lists */
+        ul, ol {
+            margin: 16px 0;
+            padding-left: 24px;
+        }
+
+        li {
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+
+        li::marker {
+            color: var(--accent-green);
+        }
+
+        /* Steps */
+        .steps {
+            margin: 24px 0;
+            position: relative;
+        }
+
+        .step {
+            display: flex;
+            gap: 20px;
+            padding: 20px 0;
+            position: relative;
+        }
+
+        .step::before {
+            content: '';
+            position: absolute;
+            left: 19px;
+            top: 60px;
+            bottom: 0;
+            width: 2px;
+            background: var(--border);
+        }
+
+        .step:last-child::before {
+            display: none;
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            background: var(--accent-green-dim);
+            border: 2px solid var(--accent-green);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            color: var(--accent-green);
+            flex-shrink: 0;
+            z-index: 1;
+        }
+
+        .step-content {
+            flex: 1;
+            padding-top: 6px;
+        }
+
+        .step-content h4 {
+            margin-top: 0;
+        }
+
+        /* Mobile Sidebar Toggle */
+        .sidebar-toggle {
+            display: none;
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 56px;
+            height: 56px;
+            background: var(--accent-green);
+            border: none;
+            border-radius: 50%;
+            color: var(--bg-primary);
+            cursor: pointer;
+            z-index: 1002;
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main {
+                margin-left: 0;
+                max-width: 100%;
+                padding: calc(var(--header-height) + 24px) 24px 80px;
+            }
+
+            .sidebar-toggle {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .hero h1 {
+                font-size: 32px;
+            }
+
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 80px;
+            padding: 40px 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .footer a {
+            color: var(--accent-green);
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="progressBar"></div>
+
+    <header class="header">
+        <div class="header-content">
+            <a href="#" class="logo">
+                <div class="logo-icon">⚡</div>
+                <div class="logo-text">FastAPI<span>Scaffold</span></div>
+            </a>
+            <div class="header-badge">
+                <span>v1.0.0</span>
+            </div>
+        </div>
+    </header>
+
+    <nav class="sidebar" id="sidebar">
+        <div class="nav-section">
+            <div class="nav-title">Getting Started</div>
+            <a href="#intro" class="nav-link active">
+                <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                Introducción
+            </a>
+            <a href="#automated-setup" class="nav-link">
+                <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                Setup Automatizado
+            </a>
+            <a href="#manual-setup" class="nav-link">
+                <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                Setup Manual
+            </a>
+            <a href="#verify" class="nav-link">
+                <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Verificar Instalación
+            </a>
+        </div>
+
+        <div class="nav-section">
+            <div class="nav-title">API Usage</div>
+            <a href="#first-user" class="nav-link">
+                <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
+                Crear Usuario
+            </a>
+            <a href="#auth" class="nav-link">
+                <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+                Autenticación JWT
+            </a>
+            <a href="#authenticated" class="nav-link">
+                <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                Endpoints Protegidos
+            </a>
+        </div>
+
+        <div class="nav-section">
+            <div class="nav-title">Reference</div>
+            <a href="#env-vars" class="nav-link">
+                <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+                Variables de Entorno
+            </a>
+            <a href="#architecture" class="nav-link">
+                <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                Arquitectura
+            </a>
+            <a href="#commands" class="nav-link">
+                <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                Comandos Make
+            </a>
+        </div>
+
+        <div class="nav-section">
+            <div class="nav-title">Help</div>
+            <a href="#troubleshooting" class="nav-link">
+                <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Troubleshooting
+            </a>
+            <a href="#security" class="nav-link">
+                <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                Tips de Seguridad
+            </a>
+            <a href="#next-steps" class="nav-link">
+                <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                Próximos Pasos
+            </a>
+            <a href="#resources" class="nav-link">
+                <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                Recursos
+            </a>
+        </div>
+    </nav>
+
+    <main class="main">
+        <div class="content">
+            <!-- Hero Section -->
+            <section id="intro">
+                <div class="hero">
+                    <span class="hero-badge">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        Production Ready
+                    </span>
+                    <h1>Quick Start Guide</h1>
+                    <p>Levanta tu aplicación FastAPI completa con autenticación JWT, PostgreSQL, Redis y Docker en solo unos minutos.</p>
+                    <div class="hero-timer">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <span>Tiempo estimado: <strong style="color: var(--accent-green)">~5 minutos</strong></span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Automated Setup -->
+            <section id="automated-setup">
+                <h2>
+                    <span class="icon">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    </span>
+                    Setup Automatizado
+                </h2>
+                <p>La forma más rápida de comenzar. Un solo comando configura todo por ti:</p>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span class="code-lang bash">bash</span>
+                        <button class="copy-btn" onclick="copyCode(this)">
+                            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                            Copy
+                        </button>
+                    </div>
+                    <pre><code>./setup.sh</code></pre>
+                </div>
+
+                <p>El script automáticamente:</p>
+                <ul>
+                    <li>Instala todas las dependencias con <code>uv</code></li>
+                    <li>Crea el archivo <code>.env</code> desde el template</li>
+                    <li>Configura los pre-commit hooks</li>
+                    <li>Inicializa el repositorio git</li>
+                </ul>
+
+                <div class="tip-box">
+                    <div class="tip-header">
+                        <svg width="18" height="18" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
+                        <span style="color: var(--accent-green)">Recomendado</span>
+                    </div>
+                    <p>El setup automatizado es la opción recomendada para la mayoría de casos. Solo sigue con el setup manual si necesitas control granular sobre cada paso.</p>
+                </div>
+            </section>
+
+            <!-- Manual Setup -->
+            <section id="manual-setup">
+                <h2>
+                    <span class="icon">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    </span>
+                    Setup Manual
+                </h2>
+
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h4>Instalar Dependencias</h4>
+                            <p>Primero, asegúrate de tener <code>uv</code> instalado (el gestor de paquetes ultra-rápido para Python):</p>
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <span class="code-lang bash">bash</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">
+                                        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                                        Copy
+                                    </button>
+                                </div>
+                                <pre><code><span class="token-comment"># Instalar uv si no lo tienes</span>
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+<span class="token-comment"># Instalar dependencias del proyecto</span>
+uv sync --all-extras</code></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h4>Configurar Variables de Entorno</h4>
+                            <p>Copia el archivo de ejemplo y personaliza los valores:</p>
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <span class="code-lang bash">bash</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">
+                                        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                                        Copy
+                                    </button>
+                                </div>
+                                <pre><code><span class="token-comment"># Copiar archivo de ejemplo</span>
+cp .env.example .env
+
+<span class="token-comment"># Editar con tus valores</span>
+nano .env</code></pre>
+                            </div>
+
+                            <p><strong>Valores mínimos requeridos en <code>.env</code>:</strong></p>
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <span class="code-lang">env</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">
+                                        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                                        Copy
+                                    </button>
+                                </div>
+                                <pre><code><span class="token-variable">DATABASE_URL</span>=<span class="token-string">postgresql+asyncpg://postgres:postgres@localhost:5432/fastapi_db</span>
+<span class="token-variable">SECRET_KEY</span>=<span class="token-string">your-super-secret-key-min-32-characters-here</span></code></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h4>Iniciar Servicios</h4>
+                            <p>Levanta PostgreSQL y Redis con Docker Compose:</p>
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <span class="code-lang bash">bash</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">
+                                        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                                        Copy
+                                    </button>
+                                </div>
+                                <pre><code><span class="token-comment"># Solo base de datos y Redis</span>
+docker-compose up -d db redis
+
+<span class="token-comment"># O todos los servicios (incluyendo la app)</span>
+docker-compose up</code></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <h4>Ejecutar la Aplicación</h4>
+                            <p>Inicia el servidor de desarrollo con hot-reload:</p>
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <span class="code-lang bash">bash</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">
+                                        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                                        Copy
+                                    </button>
+                                </div>
+                                <pre><code><span class="token-comment"># Modo desarrollo (con auto-reload)</span>
+uv run uvicorn fastapi_project.main:app --reload
+
+<span class="token-comment"># O usando Make</span>
+make run</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Verify Installation -->
+            <section id="verify">
+                <h2>
+                    <span class="icon">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </span>
+                    Verificar Instalación
+                </h2>
+
+                <h3>1. Health Check</h3>
+                <p>Verifica que el servidor esté corriendo correctamente:</p>
+                <div class="code-block">
+                    <div class="code-header">
+                        <span class="code-lang bash">bash</span>
+                        <button class="copy-btn" onclick="copyCode(this)">
+                            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                            Copy
+                        </button>
+                    </div>
+                    <pre><code>curl http://localhost:8000/api/v1/health</code></pre>
+                </div>
+
+                <p>Respuesta esperada:</p>
+                <div class="code-block">
+                    <div class="code-header">
+                        <span class="code-lang json">json</span>
+                        <button class="copy-btn" onclick="copyCode(this)">
+                            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                            Copy
+                        </button>
+                    </div>
+                    <pre><code>{<span class="token-property">"status"</span>: <span class="token-string">"healthy"</span>}</code></pre>
+                </div>
+
+                <h3>2. Documentación Interactiva</h3>
+                <p>Abre en tu navegador: <a href="http://localhost:8000/docs" target="_blank" class="external-link">http://localhost:8000/docs <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a></p>
+
+                <h3>3. Ejecutar Tests</h3>
+                <div class="code-block">
+                    <div class="code-header">
+                        <span class="code-lang bash">bash</span>
+                        <button class="copy-btn" onclick="copyCode(this)">
+                            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                            Copy
+                        </button>
+                    </div>
+                    <pre><code><span class="token-comment"># Tests básicos</span>
+make test
+
+<span class="token-comment"># Tests con coverage</span>
+make test-cov</code></pre>
+                </div>
+            </section>
+
+            <!-- Create First User -->
+            <section id="first-user">
+                <h2>
+                    <span class="icon">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
+                    </span>
+                    Crear Tu Primer Usuario
+                </h2>
+
+                <p>Hay múltiples formas de crear un usuario. Elige la que prefieras:</p>
+
+                <div class="tabs-container">
+                    <div class="tabs-header">
+                        <button class="tab-btn active" onclick="switchTab(event, 'swagger-tab')">Swagger UI</button>
+                        <button class="tab-btn" onclick="switchTab(event, 'curl-tab')">cURL</button>
+                        <button class="tab-btn" onclick="switchTab(event, 'httpie-tab')">HTTPie</button>
+                    </div>
+
+                    <div id="swagger-tab" class="tab-content active">
+                        <div class="accordion-body" style="padding: 24px;">
+                            <ol>
+                                <li>Abre <a href="http://localhost:8000/docs" target="_blank">http://localhost:8000/docs</a></li>
+                                <li>Busca el endpoint <code>POST /api/v1/users</code></li>
+                                <li>Click en <strong>"Try it out"</strong></li>
+                                <li>Ingresa los datos del usuario:</li>
+                            </ol>
+                            <div class="code-block" style="margin-top: 16px;">
+                                <div class="code-header">
+                                    <span class="code-lang json">json</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">
+                                        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                                        Copy
+                                    </button>
+                                </div>
+                                <pre><code>{
+  <span class="token-property">"email"</span>: <span class="token-string">"user@example.com"</span>,
+  <span class="token-property">"username"</span>: <span class="token-string">"myuser"</span>,
+  <span class="token-property">"password"</span>: <span class="token-string">"SecurePass123"</span>,
+  <span class="token-property">"full_name"</span>: <span class="token-string">"My Name"</span>
+}</code></pre>
+                            </div>
+                            <ol start="5">
+                                <li>Click en <strong>"Execute"</strong></li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <div id="curl-tab" class="tab-content">
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-lang bash">bash</span>
+                                <button class="copy-btn" onclick="copyCode(this)">
+                                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                                    Copy
+                                </button>
+                            </div>
+                            <pre><code>curl -X POST http://localhost:8000/api/v1/users \
+  -H <span class="token-string">"Content-Type: application/json"</span> \
+  -d <span class="token-string">'{
+    "email": "user@example.com",
+    "username": "myuser",
+    "password": "SecurePass123",
+    "full_name": "My Name"
+  }'</span></code></pre>
+                        </div>
+                    </div>
+
+                    <div id="httpie-tab" class="tab-content">
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-lang bash">bash</span>
+                                <button class="copy-btn" onclick="copyCode(this)">
+                                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                                    Copy
+                                </button>
+                            </div>
+                            <pre><code>http POST http://localhost:8000/api/v1/users \
+  email=<span class="token-string">user@example.com</span> \
+  username=<span class="token-string">myuser</span> \
+  password=<span class="token-string">SecurePass123</span> \
+  full_name=<span class="token-string">"My Name"</span></code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Authentication -->
+            <section id="auth">
+                <h2>
+                    <span class="icon">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+                    </span>
+                    Login y Obtener Token JWT
+                </h2>
+
+                <p>Una vez creado el usuario, obtén tokens de autenticación:</p>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span class="code-lang bash">bash</span>
+                        <button class="copy-btn" onclick="copyCode(this)">
+                            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                            Copy
+                        </button>
+                    </div>
+                    <pre><code>curl -X POST http://localhost:8000/api/v1/auth/login \
+  -H <span class="token-string">"Content-Type: application/json"</span> \
+  -d <span class="token-string">'{
+    "username": "myuser",
+    "password": "SecurePass123"
+  }'</span></code></pre>
+                </div>
+
+                <p>Respuesta con tokens:</p>
+                <div class="code-block">
+                    <div class="code-header">
+                        <span class="code-lang json">json</span>
+                        <button class="copy-btn" onclick="copyCode(this)">
+                            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                            Copy
+                        </button>
+                    </div>
+                    <pre><code>{
+  <span class="token-property">"access_token"</span>: <span class="token-string">"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."</span>,
+  <span class="token-property">"refresh_token"</span>: <span class="token-string">"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."</span>,
+  <span class="token-property">"token_type"</span>: <span class="token-string">"bearer"</span>
+}</code></pre>
+                </div>
+
+                <div class="tip-box">
+                    <div class="tip-header">
+                        <svg width="18" height="18" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
+                        <span style="color: var(--accent-green)">Tip</span>
+                    </div>
+                    <p>Guarda el <code>access_token</code> — lo necesitarás para autenticarte en endpoints protegidos. El <code>refresh_token</code> sirve para obtener nuevos access tokens cuando expiren.</p>
+                </div>
+            </section>
+
+            <!-- Authenticated Endpoints -->
+            <section id="authenticated">
+                <h2>
+                    <span class="icon">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                    </span>
+                    Usar Endpoints Protegidos
+                </h2>
+
+                <p>Para acceder a endpoints que requieren autenticación, incluye el token en el header <code>Authorization</code>:</p>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span class="code-lang bash">bash</span>
+                        <button class="copy-btn" onclick="copyCode(this)">
+                            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                            Copy
+                        </button>
+                    </div>
+                    <pre><code><span class="token-comment"># Obtener información del usuario actual</span>
+curl http://localhost:8000/api/v1/users/me \
+  -H <span class="token-string">"Authorization: Bearer YOUR_ACCESS_TOKEN"</span></code></pre>
+                </div>
+
+                <p>Respuesta esperada:</p>
+                <div class="code-block">
+                    <div class="code-header">
+                        <span class="code-lang json">json</span>
+                        <button class="copy-btn" onclick="copyCode(this)">
+                            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                            Copy
+                        </button>
+                    </div>
+                    <pre><code>{
+  <span class="token-property">"id"</span>: <span class="token-number">1</span>,
+  <span class="token-property">"email"</span>: <span class="token-string">"user@example.com"</span>,
+  <span class="token-property">"username"</span>: <span class="token-string">"myuser"</span>,
+  <span class="token-property">"full_name"</span>: <span class="token-string">"My Name"</span>,
+  <span class="token-property">"is_active"</span>: <span class="token-keyword">true</span>,
+  <span class="token-property">"is_superuser"</span>: <span class="token-keyword">false</span>,
+  <span class="token-property">"created_at"</span>: <span class="token-string">"2025-01-04T12:00:00Z"</span>
+}</code></pre>
+                </div>
+            </section>
+
+            <!-- Environment Variables -->
+            <section id="env-vars">
+                <h2>
+                    <span class="icon">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+                    </span>
+                    Variables de Entorno
+                </h2>
+
+                <p>Referencia completa de todas las variables de configuración disponibles:</p>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Variable</th>
+                                <th>Descripción</th>
+                                <th>Default</th>
+                                <th>Requerida</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>DATABASE_URL</code></td>
+                                <td>URL de conexión a PostgreSQL (asyncpg)</td>
+                                <td>—</td>
+                                <td><span class="badge badge-red">Sí</span></td>
+                            </tr>
+                            <tr>
+                                <td><code>SECRET_KEY</code></td>
+                                <td>Clave secreta para JWT (mínimo 32 chars)</td>
+                                <td>—</td>
+                                <td><span class="badge badge-red">Sí</span></td>
+                            </tr>
+                            <tr>
+                                <td><code>REDIS_URL</code></td>
+                                <td>URL de conexión a Redis</td>
+                                <td><code>redis://localhost:6379</code></td>
+                                <td><span class="badge badge-green">No</span></td>
+                            </tr>
+                            <tr>
+                                <td><code>ACCESS_TOKEN_EXPIRE_MINUTES</code></td>
+                                <td>Tiempo de expiración del access token</td>
+                                <td><code>30</code></td>
+                                <td><span class="badge badge-green">No</span></td>
+                            </tr>
+                            <tr>
+                                <td><code>REFRESH_TOKEN_EXPIRE_DAYS</code></td>
+                                <td>Tiempo de expiración del refresh token</td>
+                                <td><code>7</code></td>
+                                <td><span class="badge badge-green">No</span></td>
+                            </tr>
+                            <tr>
+                                <td><code>CORS_ORIGINS</code></td>
+                                <td>Orígenes permitidos (separados por coma)</td>
+                                <td><code>http://localhost:3000</code></td>
+                                <td><span class="badge badge-green">No</span></td>
+                            </tr>
+                            <tr>
+                                <td><code>LOG_LEVEL</code></td>
+                                <td>Nivel de logging</td>
+                                <td><code>INFO</code></td>
+                                <td><span class="badge badge-green">No</span></td>
+                            </tr>
+                            <tr>
+                                <td><code>DEBUG</code></td>
+                                <td>Modo debug (true/false)</td>
+                                <td><code>false</code></td>
+                                <td><span class="badge badge-green">No</span></td>
+                            </tr>
+                            <tr>
+                                <td><code>ENVIRONMENT</code></td>
+                                <td>Entorno (development/staging/production)</td>
+                                <td><code>development</code></td>
+                                <td><span class="badge badge-green">No</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Architecture -->
+            <section id="architecture">
+                <h2>
+                    <span class="icon">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                    </span>
+                    Arquitectura del Proyecto
+                </h2>
+
+                <p>Diagrama de la estructura y flujo de datos:</p>
+
+                <div class="ascii-box">
+                    <pre class="ascii-art">
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           FastAPI Scaffold Architecture                      │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+                              ┌─────────────┐
+                              │   Client    │
+                              │ (Browser/   │
+                              │   Mobile)   │
+                              └──────┬──────┘
+                                     │
+                                     ▼
+┌────────────────────────────────────────────────────────────────────────────┐
+│                              NGINX (Optional)                               │
+│                         Reverse Proxy / Load Balancer                       │
+└────────────────────────────────────┬───────────────────────────────────────┘
+                                     │
+                                     ▼
+┌────────────────────────────────────────────────────────────────────────────┐
+│                              FastAPI Application                            │
+│  ┌──────────────────────────────────────────────────────────────────────┐  │
+│  │                           Routes Layer                                │  │
+│  │   /api/v1/auth  │  /api/v1/users  │  /api/v1/health  │  /docs        │  │
+│  └───────────────────────────┬──────────────────────────────────────────┘  │
+│                              │                                              │
+│  ┌───────────────────────────▼──────────────────────────────────────────┐  │
+│  │                         Middleware Stack                              │  │
+│  │   CORS  │  Auth (JWT)  │  Rate Limiting  │  Request Logging          │  │
+│  └───────────────────────────┬──────────────────────────────────────────┘  │
+│                              │                                              │
+│  ┌───────────────────────────▼──────────────────────────────────────────┐  │
+│  │                         Services Layer                                │  │
+│  │   UserService  │  AuthService  │  TokenService  │  CacheService      │  │
+│  └───────────────────────────┬──────────────────────────────────────────┘  │
+│                              │                                              │
+│  ┌───────────────────────────▼──────────────────────────────────────────┐  │
+│  │                          Models Layer                                 │  │
+│  │   User (SQLModel)  │  Token (Pydantic)  │  Schemas (Request/Response)│  │
+│  └──────────────────────────────────────────────────────────────────────┘  │
+└──────────────────┬─────────────────────────────────┬────────────────────────┘
+                   │                                 │
+                   ▼                                 ▼
+     ┌─────────────────────────┐      ┌─────────────────────────┐
+     │      PostgreSQL         │      │         Redis           │
+     │   ┌─────────────────┐   │      │   ┌─────────────────┐   │
+     │   │  users          │   │      │   │  token_blacklist│   │
+     │   │  refresh_tokens │   │      │   │  rate_limits    │   │
+     │   │  audit_logs     │   │      │   │  cache          │   │
+     │   └─────────────────┘   │      │   └─────────────────┘   │
+     └─────────────────────────┘      └─────────────────────────┘
+
+┌────────────────────────────────────────────────────────────────────────────┐
+│                            Project Structure                                │
+├────────────────────────────────────────────────────────────────────────────┤
+│  src/fastapi_project/                                                      │
+│  ├── main.py              # App entry point, lifespan events               │
+│  ├── config.py            # Pydantic Settings (env vars)                   │
+│  ├── exceptions.py        # Custom exception classes                       │
+│  ├── routes/              # FastAPI routers                                │
+│  │   ├── auth.py          # /auth endpoints (login, refresh, logout)       │
+│  │   ├── users.py         # /users endpoints (CRUD)                        │
+│  │   └── health.py        # /health endpoint                               │
+│  ├── models/              # SQLModel/Pydantic models                       │
+│  │   ├── user.py          # User table model                               │
+│  │   └── token.py         # Token schemas                                  │
+│  ├── services/            # Business logic                                 │
+│  │   ├── auth.py          # Authentication logic                           │
+│  │   ├── user.py          # User CRUD operations                           │
+│  │   └── cache.py         # Redis operations                               │
+│  └── utils/               # Helpers                                        │
+│      ├── security.py      # Password hashing, JWT                          │
+│      └── deps.py          # FastAPI dependencies                           │
+└────────────────────────────────────────────────────────────────────────────┘</pre>
+                </div>
+            </section>
+
+            <!-- Make Commands -->
+            <section id="commands">
+                <h2>
+                    <span class="icon">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    </span>
+                    Comandos Make (Cheatsheet)
+                </h2>
+
+                <p>Todos los comandos disponibles organizados por categoría:</p>
+
+                <h4>🚀 Desarrollo</h4>
+                <div class="commands-grid">
+                    <div class="command-pill" onclick="copyCommand('make run')">
+                        <code>make run</code>
+                        <span>Iniciar servidor dev</span>
+                    </div>
+                    <div class="command-pill" onclick="copyCommand('make shell')">
+                        <code>make shell</code>
+                        <span>IPython interactivo</span>
+                    </div>
+                    <div class="command-pill" onclick="copyCommand('make db-shell')">
+                        <code>make db-shell</code>
+                        <span>PostgreSQL shell</span>
+                    </div>
+                </div>
+
+                <h4>🧪 Testing</h4>
+                <div class="commands-grid">
+                    <div class="command-pill" onclick="copyCommand('make test')">
+                        <code>make test</code>
+                        <span>Ejecutar tests</span>
+                    </div>
+                    <div class="command-pill" onclick="copyCommand('make test-cov')">
+                        <code>make test-cov</code>
+                        <span>Tests + coverage</span>
+                    </div>
+                </div>
+
+                <h4>🔍 Calidad de Código</h4>
+                <div class="commands-grid">
+                    <div class="command-pill" onclick="copyCommand('make lint')">
+                        <code>make lint</code>
+                        <span>Ruff linting</span>
+                    </div>
+                    <div class="command-pill" onclick="copyCommand('make lint-fix')">
+                        <code>make lint-fix</code>
+                        <span>Auto-fix issues</span>
+                    </div>
+                    <div class="command-pill" onclick="copyCommand('make format')">
+                        <code>make format</code>
+                        <span>Formatear código</span>
+                    </div>
+                    <div class="command-pill" onclick="copyCommand('make quality')">
+                        <code>make quality</code>
+                        <span>All checks</span>
+                    </div>
+                    <div class="command-pill" onclick="copyCommand('make security')">
+                        <code>make security</code>
+                        <span>Security scan</span>
+                    </div>
+                    <div class="command-pill" onclick="copyCommand('make pre-commit')">
+                        <code>make pre-commit</code>
+                        <span>Run hooks</span>
+                    </div>
+                </div>
+
+                <h4>🗄️ Base de Datos</h4>
+                <div class="commands-grid">
+                    <div class="command-pill" onclick="copyCommand('make migrate')">
+                        <code>make migrate</code>
+                        <span>Aplicar migraciones</span>
+                    </div>
+                    <div class="command-pill" onclick="copyCommand('make migrate-create')">
+                        <code>make migrate-create</code>
+                        <span>Crear migración</span>
+                    </div>
+                </div>
+
+                <h4>🐳 Docker</h4>
+                <div class="commands-grid">
+                    <div class="command-pill" onclick="copyCommand('make docker-build')">
+                        <code>make docker-build</code>
+                        <span>Build imagen</span>
+                    </div>
+                    <div class="command-pill" onclick="copyCommand('make docker-up')">
+                        <code>make docker-up</code>
+                        <span>Levantar servicios</span>
+                    </div>
+                    <div class="command-pill" onclick="copyCommand('make docker-down')">
+                        <code>make docker-down</code>
+                        <span>Detener servicios</span>
+                    </div>
+                    <div class="command-pill" onclick="copyCommand('make docker-logs')">
+                        <code>make docker-logs</code>
+                        <span>Ver logs</span>
+                    </div>
+                </div>
+
+                <h4>🧹 Limpieza</h4>
+                <div class="commands-grid">
+                    <div class="command-pill" onclick="copyCommand('make clean')">
+                        <code>make clean</code>
+                        <span>Limpiar cache</span>
+                    </div>
+                    <div class="command-pill" onclick="copyCommand('make help')">
+                        <code>make help</code>
+                        <span>Ver ayuda</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Troubleshooting -->
+            <section id="troubleshooting">
+                <h2>
+                    <span class="icon">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </span>
+                    Troubleshooting
+                </h2>
+
+                <p>Soluciones a problemas comunes:</p>
+
+                <div class="accordion">
+                    <div class="accordion-item">
+                        <button class="accordion-header" onclick="toggleAccordion(this)">
+                            <div class="status">
+                                <span class="badge badge-red">Error</span>
+                                Database Connection Failed
+                            </div>
+                            <svg class="chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div class="accordion-content">
+                            <div class="accordion-body">
+                                <p><strong>Problema:</strong> No se puede conectar a PostgreSQL</p>
+                                <p><strong>Solución:</strong></p>
+                                <div class="code-block">
+                                    <div class="code-header">
+                                        <span class="code-lang bash">bash</span>
+                                        <button class="copy-btn" onclick="copyCode(this)">
+                                            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                                            Copy
+                                        </button>
+                                    </div>
+                                    <pre><code><span class="token-comment"># Verificar si los servicios están corriendo</span>
+docker-compose ps
+
+<span class="token-comment"># Reiniciar base de datos</span>
+docker-compose restart db
+
+<span class="token-comment"># Ver logs de la base de datos</span>
+docker-compose logs db</code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <button class="accordion-header" onclick="toggleAccordion(this)">
+                            <div class="status">
+                                <span class="badge badge-amber">Warning</span>
+                                Port Already in Use
+                            </div>
+                            <svg class="chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div class="accordion-content">
+                            <div class="accordion-body">
+                                <p><strong>Problema:</strong> El puerto 8000 ya está en uso</p>
+                                <p><strong>Solución:</strong></p>
+                                <div class="code-block">
+                                    <div class="code-header">
+                                        <span class="code-lang bash">bash</span>
+                                        <button class="copy-btn" onclick="copyCode(this)">
+                                            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                                            Copy
+                                        </button>
+                                    </div>
+                                    <pre><code><span class="token-comment"># Encontrar proceso usando el puerto</span>
+lsof -i :8000
+
+<span class="token-comment"># Matar el proceso</span>
+kill -9 &lt;PID&gt;
+
+<span class="token-comment"># O usar un puerto diferente</span>
+uv run uvicorn fastapi_project.main:app --reload --port 8001</code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <button class="accordion-header" onclick="toggleAccordion(this)">
+                            <div class="status">
+                                <span class="badge badge-red">Error</span>
+                                Tests Failing
+                            </div>
+                            <svg class="chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div class="accordion-content">
+                            <div class="accordion-body">
+                                <p><strong>Problema:</strong> Los tests fallan con errores de base de datos</p>
+                                <p><strong>Solución:</strong></p>
+                                <div class="code-block">
+                                    <div class="code-header">
+                                        <span class="code-lang bash">bash</span>
+                                        <button class="copy-btn" onclick="copyCode(this)">
+                                            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                                            Copy
+                                        </button>
+                                    </div>
+                                    <pre><code><span class="token-comment"># Asegurarse de que test database esté configurada</span>
+<span class="token-keyword">export</span> DATABASE_URL=<span class="token-string">sqlite+aiosqlite:///:memory:</span>
+
+<span class="token-comment"># Ejecutar tests</span>
+make test</code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <button class="accordion-header" onclick="toggleAccordion(this)">
+                            <div class="status">
+                                <span class="badge badge-amber">Warning</span>
+                                Pre-commit Hooks Failing
+                            </div>
+                            <svg class="chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div class="accordion-content">
+                            <div class="accordion-body">
+                                <p><strong>Problema:</strong> Los pre-commit hooks fallan al hacer commit</p>
+                                <p><strong>Solución:</strong></p>
+                                <div class="code-block">
+                                    <div class="code-header">
+                                        <span class="code-lang bash">bash</span>
+                                        <button class="copy-btn" onclick="copyCode(this)">
+                                            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                                            Copy
+                                        </button>
+                                    </div>
+                                    <pre><code><span class="token-comment"># Ejecutar hooks manualmente para ver errores</span>
+make pre-commit
+
+<span class="token-comment"># Arreglar issues y volver a intentar</span>
+make lint-fix
+make format
+git add .
+git commit -m <span class="token-string">"fix: your message"</span></code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Security Tips -->
+            <section id="security">
+                <h2>
+                    <span class="icon">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                    </span>
+                    Tips de Seguridad para Producción
+                </h2>
+
+                <div class="tip-box danger">
+                    <div class="tip-header">
+                        <svg width="18" height="18" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                        <span style="color: var(--accent-red)">Importante</span>
+                    </div>
+                    <p>Estas configuraciones son <strong>críticas</strong> para ambientes de producción. No las ignores.</p>
+                </div>
+
+                <h3>✅ Checklist de Seguridad</h3>
+                <ul>
+                    <li><strong>SECRET_KEY:</strong> Genera una clave aleatoria de al menos 64 caracteres usando <code>openssl rand -hex 32</code></li>
+                    <li><strong>DEBUG:</strong> Asegúrate que <code>DEBUG=false</code> en producción</li>
+                    <li><strong>CORS:</strong> Configura <code>CORS_ORIGINS</code> solo con dominios permitidos específicos</li>
+                    <li><strong>HTTPS:</strong> Siempre usa HTTPS en producción. Configura un reverse proxy (Nginx/Traefik)</li>
+                    <li><strong>Rate Limiting:</strong> Habilita rate limiting para prevenir ataques de fuerza bruta</li>
+                    <li><strong>Database:</strong> Usa contraseñas fuertes y conexiones SSL para PostgreSQL</li>
+                    <li><strong>Tokens:</strong> Reduce <code>ACCESS_TOKEN_EXPIRE_MINUTES</code> a 15-30 minutos</li>
+                    <li><strong>Headers:</strong> Configura security headers (HSTS, CSP, X-Frame-Options)</li>
+                </ul>
+
+                <h3>🔐 Generación de SECRET_KEY</h3>
+                <div class="code-block">
+                    <div class="code-header">
+                        <span class="code-lang bash">bash</span>
+                        <button class="copy-btn" onclick="copyCode(this)">
+                            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                            Copy
+                        </button>
+                    </div>
+                    <pre><code><span class="token-comment"># Generar una clave segura</span>
+openssl rand -hex 32
+
+<span class="token-comment"># O con Python</span>
+python -c <span class="token-string">"import secrets; print(secrets.token_urlsafe(64))"</span></code></pre>
+                </div>
+
+                <h3>🛡️ Headers de Seguridad Recomendados</h3>
+                <div class="code-block">
+                    <div class="code-header">
+                        <span class="code-lang python">nginx.conf</span>
+                        <button class="copy-btn" onclick="copyCode(this)">
+                            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                            Copy
+                        </button>
+                    </div>
+                    <pre><code><span class="token-comment"># En tu configuración de Nginx</span>
+add_header X-Frame-Options "SAMEORIGIN" always;
+add_header X-Content-Type-Options "nosniff" always;
+add_header X-XSS-Protection "1; mode=block" always;
+add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+add_header Content-Security-Policy "default-src 'self'" always;</code></pre>
+                </div>
+            </section>
+
+            <!-- Next Steps -->
+            <section id="next-steps">
+                <h2>
+                    <span class="icon">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                    </span>
+                    Próximos Pasos
+                </h2>
+
+                <div class="cards-grid">
+                    <div class="card">
+                        <div class="card-icon">
+                            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                        </div>
+                        <h4>📚 Lee la Documentación</h4>
+                        <p>Revisa README.md y ARCHITECTURE.md para entender el sistema completo.</p>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon" style="background: var(--accent-cyan-dim); border-color: var(--accent-cyan); color: var(--accent-cyan);">
+                            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
+                        </div>
+                        <h4>🔧 Personaliza el Proyecto</h4>
+                        <p>Agrega tus modelos en models/, rutas en routes/ y lógica en services/.</p>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon" style="background: rgba(139, 92, 246, 0.15); border-color: var(--accent-purple); color: var(--accent-purple);">
+                            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                        </div>
+                        <h4>✅ Escribe Tests</h4>
+                        <p>Agrega tests en tests/test_routes/ y tests/test_services/ para tu código.</p>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon" style="background: rgba(245, 158, 11, 0.15); border-color: var(--accent-amber); color: var(--accent-amber);">
+                            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                        </div>
+                        <h4>🚀 Deploy</h4>
+                        <p>Build Docker image con make docker-build y despliega a tu cloud provider.</p>
+                    </div>
+                </div>
+
+                <h3>💡 Tips de Desarrollo</h3>
+
+                <h4>Hot Reload</h4>
+                <p>El servidor se reinicia automáticamente cuando modificas código gracias al flag <code>--reload</code>.</p>
+
+                <h4>Migraciones de Base de Datos</h4>
+                <div class="code-block">
+                    <div class="code-header">
+                        <span class="code-lang bash">bash</span>
+                        <button class="copy-btn" onclick="copyCode(this)">
+                            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                            Copy
+                        </button>
+                    </div>
+                    <pre><code><span class="token-comment"># Crear migración después de cambiar modelos</span>
+make migrate-create
+
+<span class="token-comment"># Aplicar migraciones</span>
+make migrate</code></pre>
+                </div>
+
+                <h4>Shell Interactivo</h4>
+                <div class="code-block">
+                    <div class="code-header">
+                        <span class="code-lang bash">bash</span>
+                        <button class="copy-btn" onclick="copyCode(this)">
+                            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                            Copy
+                        </button>
+                    </div>
+                    <pre><code><span class="token-comment"># IPython con contexto de la app</span>
+make shell
+
+<span class="token-comment"># Probar cosas interactivamente</span>
+&gt;&gt;&gt; <span class="token-keyword">from</span> fastapi_project.models.user <span class="token-keyword">import</span> User
+&gt;&gt;&gt; <span class="token-comment"># Experimentar...</span></code></pre>
+                </div>
+            </section>
+
+            <!-- Resources -->
+            <section id="resources">
+                <h2>
+                    <span class="icon">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                    </span>
+                    Recursos Externos
+                </h2>
+
+                <div class="resources-grid">
+                    <a href="https://fastapi.tiangolo.com" target="_blank" class="resource-link">
+                        <div class="resource-icon">⚡</div>
+                        <span>FastAPI Docs</span>
+                    </a>
+                    <a href="https://sqlmodel.tiangolo.com" target="_blank" class="resource-link">
+                        <div class="resource-icon">🗄️</div>
+                        <span>SQLModel Docs</span>
+                    </a>
+                    <a href="https://docs.pydantic.dev" target="_blank" class="resource-link">
+                        <div class="resource-icon">✅</div>
+                        <span>Pydantic Docs</span>
+                    </a>
+                    <a href="https://docs.astral.sh/uv" target="_blank" class="resource-link">
+                        <div class="resource-icon">📦</div>
+                        <span>uv Docs</span>
+                    </a>
+                </div>
+            </section>
+
+            <footer class="footer">
+                <p>FastAPI Scaffold — Built with ⚡ by <a href="#">Homero Thompson</a></p>
+                <p style="margin-top: 8px; font-size: 12px;">Happy coding! 🎉</p>
+            </footer>
+        </div>
+    </main>
+
+    <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()">
+        <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+
+    <script>
+        // Progress Bar
+        window.addEventListener('scroll', () => {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.getElementById('progressBar').style.width = scrolled + '%';
+        });
+
+        // Copy Code
+        function copyCode(btn) {
+            const pre = btn.closest('.code-block').querySelector('pre');
+            const code = pre.textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                btn.classList.add('copied');
+                btn.innerHTML = '<svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Copied!';
+                setTimeout(() => {
+                    btn.classList.remove('copied');
+                    btn.innerHTML = '<svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg> Copy';
+                }, 2000);
+            });
+        }
+
+        // Copy Command (for pills)
+        function copyCommand(cmd) {
+            navigator.clipboard.writeText(cmd).then(() => {
+                // Visual feedback could be added here
+            });
+        }
+
+        // Tabs
+        function switchTab(event, tabId) {
+            const container = event.target.closest('.tabs-container');
+            container.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            container.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        // Accordion
+        function toggleAccordion(header) {
+            const item = header.parentElement;
+            item.classList.toggle('open');
+        }
+
+        // Sidebar Toggle (Mobile)
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
+        // Active Nav Link on Scroll
+        const sections = document.querySelectorAll('section[id]');
+        const navLinks = document.querySelectorAll('.nav-link');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (scrollY >= sectionTop - 100) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) {
+                    link.classList.add('active');
+                }
+            });
+        });
+
+        // Close sidebar on link click (mobile)
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 1024) {
+                    document.getElementById('sidebar').classList.remove('open');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
